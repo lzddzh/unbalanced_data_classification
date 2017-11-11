@@ -255,8 +255,27 @@ def model_tuning():
     make_submission(model, param)
 
 def ensumble_vote():
-    pass
-
+    # change these filenames to the models output that you want to use.
+    files = ['output_rf_0.61636.csv',
+            'output_rf_0.61636.csv',
+            'output_RF_0.61365.csv',
+            'output_gdbt_0.60809(off)_1.3.csv',
+            'output_XGB_0.61395.csv'
+    ]
+    pdFrames = []
+    lists = []
+    for f in files:
+        pdFrames.append(pd.read_csv(f))
+    for pdf in pdFrames:
+        lists.append(pdf['prediction'].tolist())
+    matrix = np.array(lists)
+    print("Predictions from " + str(len(files)) + " models.")
+    print(matrix)
+    result = list(mode(matrix)[0][0])
+    pdFrames[0]['prediction'] = result
+    print("Voting result write into file output_vote.csv")
+    pdFrames[0].to_csv('output_vote.csv', index=False)
+ 
 if __name__=='__main__':
     model_tuning()
     #ensumble_vote()
