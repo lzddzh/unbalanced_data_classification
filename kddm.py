@@ -67,6 +67,7 @@ def load_data(dataFile):
         data[feature_name] = (data[feature_name] - min_value) / (max_value - min_value)
 
     x = data.drop("y", axis=1)
+    x = x.drop("id", axis=1)
     y = data["y"]
     return x, y
 
@@ -132,6 +133,14 @@ def assign_weight(y, weight):
             weight_list.append(weight['1'])
     return weight_list
 
+def feature_importance_rank(model, x):
+    rank = []
+    # [::-1] means reverse the array. After reverse, the array arrange from big to small.
+    rankIdx = np.argsort(model.feature_importances_)[::-1]
+    for idx in rankIdx:
+        rank.append(list(x)[idx])
+    return rank
+
 '''
 Train the model on the whole training data,
 make predictions on the test data,
@@ -143,6 +152,7 @@ def make_submission(model, param):
     print('Training the model on whole training data set...', end='')
     model.fit(x, y, assign_weight(y, param['class_weight']))
     print('Finished.')
+    print(feature_importance_rank(model, x))
     x, y = load_data('test.csv')
     print('Make prediction on the test data set...', end='')
     predict = model.predict(x)
@@ -185,20 +195,20 @@ def model1_with_parameter():
 def model2_with_parameter():
     param = {
         'name':'gdbt',
-        'class_weight':{'0':1, '1':4},  # The weight of category.
+        'class_weight':{'0':1, '1':3},  # The weight of category.
         'loss':'deviance', 
         'learning_rate':0.1, 
-        'n_estimators':250, 
+        'n_estimators':300, 
         'subsample':1.0, 
         'criterion':'friedman_mse', 
-        'min_samples_split':27, 
-        'min_samples_leaf':1, 
+        'min_samples_split':40, 
+        'min_samples_leaf':20, 
         'min_weight_fraction_leaf':0.0, 
         'max_depth':3, 
         'min_impurity_decrease':0.0, 
         'min_impurity_split':None, 
         'init':None, 
-        'random_state':None, 
+        'random_state':5, 
         'max_features':None, 
         'verbose':0, 
         'max_leaf_nodes':None, 
