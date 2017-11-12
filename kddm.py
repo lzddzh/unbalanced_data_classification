@@ -1,8 +1,7 @@
 # coding: utf-8
 
 # For python2.7
-from __future__ import print_function
-
+from __future__ import print_function 
 #Using Pandas python library 
 import pandas as pd
 import numpy as np
@@ -25,28 +24,30 @@ from sklearn.utils import safe_indexing
 def load_data(dataFile):
     print('Loading data from ' + dataFile)
     data = pd.read_csv(dataFile)
-
     #are there any missing values?
-    print("Is there any missing values in raw data? ", end='')
+    print("Is there any missing values in raw data? ", end="")
     print(data.isnull().values.any())
-
     data['education'] = data.education.replace('unknown',np.nan)
-    data['housing'] = data.housing.replace('unknown',np.nan)
-    data['marital'] = data.marital.replace('unknown',np.nan)
-    data['job'] = data.job.replace('unknown',np.nan)
-    data['loan'] = data.loan.replace('unknown',np.nan)
-
     data = data.fillna(data['education'].value_counts().index[0])
+    data['housing'] = data.housing.replace('unknown',np.nan)
     data = data.fillna(data['housing'].value_counts().index[0])
+    data['marital'] = data.marital.replace('unknown',np.nan)
     data = data.fillna(data['marital'].value_counts().index[0])
+    data['job'] = data.job.replace('unknown',np.nan)
     data = data.fillna(data['job'].value_counts().index[0])
+    data['loan'] = data.loan.replace('unknown',np.nan)
     data = data.fillna(data['loan'].value_counts().index[0])
-
     # Create a label (category) encoder object
     le = preprocessing.LabelEncoder()
-    data["job"] = le.fit_transform(data["job"])
-    data["marital"] = le.fit_transform(data["marital"])
-    data["education"] = le.fit_transform(data["education"])
+    #data["job"] = le.fit_transform(data["job"])
+    data = data.replace({"job" : {"retired" : 1, "student" : 2, "unemployed" : 3,
+                                    "admin." : 4, "blue-collar" : 5, "entrepreneur" : 6, "housemaid" : 7, 
+                                    "management" : 8, "self-employed" : 9, "services" : 10, "technician" : 11}})
+    #data["marital"] = le.fit_transform(data["marital"])
+    data = data.replace({"marital" : {"married" : 1, "single" : 2, "divorced" : 0 }})
+    #data["education"] = le.fit_transform(data["education"])
+    data = data.replace({"education" : {"illiterate" : 1, "basic.4y" : 2, "basic.6y" : 3, "basic.9y" : 4, "high.school" : 5, 
+                                    "professional.course" : 6, "university.degree" : 7}})
     data["default"] = le.fit_transform(data["default"])
     data["housing"] = le.fit_transform(data["housing"])
     data["loan"] = le.fit_transform(data["loan"])
@@ -68,6 +69,7 @@ def load_data(dataFile):
 
     x = data.drop("y", axis=1)
     x = x.drop("id", axis=1)
+    x = x.drop("default", axis=1)
     y = data["y"]
     return x, y
 
